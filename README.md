@@ -1,4 +1,4 @@
-![Logo](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/AppIcons/appstore.png)
+<img src="https://github.com/CodeOfNamanBhalani/Acadly/blob/main/AppIcons/appstore.png" width="220"/>
 
 # Campus Companion - Student Academic Planner 📚
 
@@ -213,16 +213,4 @@ This project is for educational purposes.
 
 **Made with ❤️ By Naman Bhalani**
 
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/1.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/2.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/3.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/4.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/5.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/6.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/7.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/13.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/8.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/9.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/10.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/11.jpeg)
-![img](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/screenshort/12.jpeg)
+<p align="center"> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/1.jpeg" width="220"/> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/2.jpeg" width="220"/> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/3.jpeg" width="220"/> </p> <p align="center"> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/4.jpeg" width="220"/> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/5.jpeg" width="220"/> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/6.jpeg" width="220"/> </p> <p align="center"> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/7.jpeg" width="220"/> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/8.jpeg" width="220"/> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/9.jpeg" width="220"/> </p> <p align="center"> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/10.jpeg" width="220"/> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/11.jpeg" width="220"/> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/12.jpeg" width="220"/> </p> <p align="center"> <img src="https://raw.githubusercontent.com/CodeOfNamanBhalani/Acadly/main/screenshort/13.jpeg" width="220"/> </p>
