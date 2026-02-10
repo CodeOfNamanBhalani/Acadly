@@ -1,4 +1,4 @@
-![Logo](logo.png)
+![Logo](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/AppIcons/appstore.png)
 
 # Campus Companion - Student Academic Planner 📚
 
