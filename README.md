@@ -1,3 +1,5 @@
+![Logo](https://github.com/CodeOfNamanBhalani/Acadly/blob/main/AppIcons/appstore.png)
+
 # Campus Companion - Student Academic Planner 📚
 
 A comprehensive Flutter application designed to help students manage their academic life efficiently. Campus Companion provides an all-in-one solution for managing timetables, assignments, exams, notes, and staying updated with campus notices.
