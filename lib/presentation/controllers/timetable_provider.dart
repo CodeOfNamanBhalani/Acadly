@@ -1,22 +1,36 @@
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
-import '../../data/database/database_service.dart';
 import '../../data/models/timetable_model.dart';
+import '../../services/api_service.dart';
 import '../../services/notification_service.dart';
 
 class TimetableProvider extends ChangeNotifier {
-  final DatabaseService _db = DatabaseService();
+  final ApiService _api = ApiService();
   final NotificationService _notificationService = NotificationService();
-  final Uuid _uuid = const Uuid();
 
   List<TimetableModel> _timetable = [];
   bool _isLoading = false;
+  String? _error;
 
   List<TimetableModel> get timetable => _timetable;
   bool get isLoading => _isLoading;
+  String? get error => _error;
 
-  void loadTimetable(String userId) {
-    _timetable = _db.getTimetableForUser(userId);
+  Future<void> loadTimetable() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    final result = await _api.getTimetable();
+
+    if (result.isSuccess && result.data != null) {
+      final List<dynamic> data = result.data is List ? result.data : [];
+      _timetable = data.map((json) => TimetableModel.fromJson(json)).toList();
+      _error = null;
+    } else {
+      _error = result.errorMessage;
+    }
+
+    _isLoading = false;
     notifyListeners();
   }
 
@@ -32,8 +46,7 @@ class TimetableProvider extends ChangeNotifier {
     return getTimetableForDay(today);
   }
 
-  Future<void> addTimetableEntry({
-    required String userId,
+  Future<bool> addTimetableEntry({
     required String subjectName,
     required String facultyName,
     required int dayOfWeek,
@@ -42,51 +55,91 @@ class TimetableProvider extends ChangeNotifier {
     required String roomNumber,
   }) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
-    final entry = TimetableModel(
-      id: _uuid.v4(),
-      subjectName: subjectName,
-      facultyName: facultyName,
+    final result = await _api.createTimetableEntry(
+      subject: subjectName,
       dayOfWeek: dayOfWeek,
       startTime: startTime,
       endTime: endTime,
-      roomNumber: roomNumber,
-      userId: userId,
+      room: roomNumber,
+      teacher: facultyName,
     );
 
-    await _db.addTimetableEntry(entry);
-    _timetable.add(entry);
+    print('Create timetable result: ${result.isSuccess}, data: ${result.data}');
 
-    // Schedule class reminder
-    _scheduleClassReminder(entry);
-
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  Future<void> updateTimetableEntry(TimetableModel entry) async {
-    await _db.updateTimetableEntry(entry);
-    final index = _timetable.indexWhere((e) => e.id == entry.id);
-    if (index != -1) {
-      _timetable[index] = entry;
+    if (result.isSuccess) {
+      // Reload all timetable data from API to ensure we have the latest
+      await loadTimetable();
+      return true;
+    } else {
+      _error = result.errorMessage;
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
-
-    // Reschedule class reminder
-    _scheduleClassReminder(entry);
-
-    notifyListeners();
   }
 
-  Future<void> deleteTimetableEntry(String id) async {
-    await _db.deleteTimetableEntry(id);
-    _timetable.removeWhere((e) => e.id == id);
-    await _notificationService.cancelNotification(id.hashCode + 20000);
+  Future<bool> updateTimetableEntry(TimetableModel entry) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    final result = await _api.updateTimetableEntry(
+      id: entry.id,
+      subject: entry.subjectName,
+      dayOfWeek: entry.dayOfWeek,
+      startTime: entry.startTime,
+      endTime: entry.endTime,
+      room: entry.roomNumber,
+      teacher: entry.facultyName,
+    );
+
+    if (result.isSuccess) {
+      final index = _timetable.indexWhere((e) => e.id == entry.id);
+      if (index != -1) {
+        _timetable[index] = entry;
+      }
+      _scheduleClassReminder(entry);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } else {
+      _error = result.errorMessage;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteTimetableEntry(String id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    final result = await _api.deleteTimetableEntry(id);
+
+    if (result.isSuccess) {
+      _timetable.removeWhere((e) => e.id == id);
+      await _notificationService.cancelNotification(id.hashCode + 20000);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } else {
+      _error = result.errorMessage;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  void clearError() {
+    _error = null;
     notifyListeners();
   }
 
   void _scheduleClassReminder(TimetableModel entry) {
-    // Calculate next occurrence of this class
     final now = DateTime.now();
     final currentDay = now.weekday - 1;
 
@@ -94,7 +147,6 @@ class TimetableProvider extends ChangeNotifier {
     if (daysUntilClass < 0) {
       daysUntilClass += 7;
     } else if (daysUntilClass == 0) {
-      // Check if class time has passed today
       final timeParts = entry.startTime.split(':');
       final classTime = DateTime(
         now.year, now.month, now.day,
@@ -119,4 +171,3 @@ class TimetableProvider extends ChangeNotifier {
     );
   }
 }
-

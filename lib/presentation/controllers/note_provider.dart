@@ -1,12 +1,10 @@
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../data/models/note_model.dart';
-import '../../data/database/database_service.dart';
+import '../../services/api_service.dart';
 
 class NoteProvider extends ChangeNotifier {
-  final DatabaseService _db = DatabaseService();
-  final Uuid _uuid = const Uuid();
+  final ApiService _api = ApiService();
 
   // Notes List
   List<NoteModel> _notes = [];
@@ -17,12 +15,14 @@ class NoteProvider extends ChangeNotifier {
   // States
   bool _isLoading = false;
   bool _isSearching = false;
+  String? _error;
 
   String _searchQuery = '';
 
   // Getters
   bool get isLoading => _isLoading;
   bool get isSearching => _isSearching;
+  String? get error => _error;
   String get searchQuery => _searchQuery;
 
   List<NoteModel> get notes =>
@@ -31,19 +31,31 @@ class NoteProvider extends ChangeNotifier {
   // ----------------------------
   // LOAD NOTES
   // ----------------------------
-  void loadNotes(String userId) {
-    _notes = _db.getNotesForUser(userId);
+  Future<void> loadNotes() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
-    // Sort latest updated first
-    _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    final result = await _api.getNotes();
 
+    if (result.isSuccess && result.data != null) {
+      final List<dynamic> data = result.data is List ? result.data : [];
+      _notes = data.map((json) => NoteModel.fromJson(json)).toList();
+      // Sort latest updated first
+      _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      _error = null;
+    } else {
+      _error = result.errorMessage;
+    }
+
+    _isLoading = false;
     notifyListeners();
   }
 
   // ----------------------------
   // SEARCH NOTES
   // ----------------------------
-  void searchNotes(String userId, String query) {
+  void searchNotes(String query) {
     _searchQuery = query;
 
     if (query.isEmpty) {
@@ -51,7 +63,12 @@ class NoteProvider extends ChangeNotifier {
       _searchResults = [];
     } else {
       _isSearching = true;
-      _searchResults = _db.searchNotes(userId, query);
+      final lowerQuery = query.toLowerCase();
+      _searchResults = _notes
+          .where((n) =>
+              n.title.toLowerCase().contains(lowerQuery) ||
+              n.content.toLowerCase().contains(lowerQuery))
+          .toList();
     }
 
     notifyListeners();
@@ -69,67 +86,95 @@ class NoteProvider extends ChangeNotifier {
   // ----------------------------
   // ADD NOTE
   // ----------------------------
-  Future<void> addNote({
-    required String userId,
+  Future<bool> addNote({
     required String title,
     required String content,
     String? color,
   }) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
-    final now = DateTime.now();
-
-    final note = NoteModel(
-      id: _uuid.v4(),
-      userId: userId,
+    final result = await _api.createNote(
       title: title,
       content: content,
-      color: color,
-      createdAt: now,
-      updatedAt: now,
     );
 
-    await _db.addNote(note);
+    print('Create note result: ${result.isSuccess}, data: ${result.data}');
 
-    // Insert newest note on top
-    _notes.insert(0, note);
-
-    _isLoading = false;
-    notifyListeners();
+    if (result.isSuccess) {
+      // Reload all notes from API to ensure we have the latest
+      await loadNotes();
+      return true;
+    } else {
+      _error = result.errorMessage;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   // ----------------------------
   // UPDATE NOTE
   // ----------------------------
-  Future<void> updateNote(NoteModel note) async {
-    final updatedNote = note.copyWith(
-      updatedAt: DateTime.now(),
+  Future<bool> updateNote(NoteModel note) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    final result = await _api.updateNote(
+      id: note.id,
+      title: note.title,
+      content: note.content,
     );
 
-    await _db.updateNote(updatedNote);
+    if (result.isSuccess) {
+      final updatedNote = note.copyWith(updatedAt: DateTime.now());
+      final index = _notes.indexWhere((n) => n.id == note.id);
 
-    final index = _notes.indexWhere((n) => n.id == note.id);
+      if (index != -1) {
+        _notes[index] = updatedNote;
+      }
 
-    if (index != -1) {
-      _notes[index] = updatedNote;
+      // Sort again after update
+      _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } else {
+      _error = result.errorMessage;
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
-
-    // Sort again after update
-    _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-
-    notifyListeners();
   }
 
   // ----------------------------
   // DELETE NOTE
   // ----------------------------
-  Future<void> deleteNote(String id) async {
-    await _db.deleteNote(id);
+  Future<bool> deleteNote(String id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
-    _notes.removeWhere((n) => n.id == id);
-    _searchResults.removeWhere((n) => n.id == id);
+    final result = await _api.deleteNote(id);
 
+    if (result.isSuccess) {
+      _notes.removeWhere((n) => n.id == id);
+      _searchResults.removeWhere((n) => n.id == id);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } else {
+      _error = result.errorMessage;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  void clearError() {
+    _error = null;
     notifyListeners();
   }
 }

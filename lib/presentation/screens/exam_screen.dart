@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/date_utils.dart';
-import '../controllers/auth_provider.dart';
 import '../controllers/exam_provider.dart';
 import '../../data/models/exam_model.dart';
 
@@ -343,7 +342,6 @@ class _ExamScreenState extends State<ExamScreen> with SingleTickerProviderStateM
                         }
 
                         // Gather all data synchronously
-                        final userId = context.read<AuthProvider>().currentUser!.id;
                         final provider = context.read<ExamProvider>();
                         final examTimeStr = '${examTime.hour.toString().padLeft(2, '0')}:${examTime.minute.toString().padLeft(2, '0')}';
                         final fullExamDate = DateTime(examDate.year, examDate.month, examDate.day, examTime.hour, examTime.minute);
@@ -365,7 +363,6 @@ class _ExamScreenState extends State<ExamScreen> with SingleTickerProviderStateM
                           ));
                         } else {
                           provider.addExam(
-                            userId: userId,
                             examName: name,
                             subject: subject,
                             examDate: fullExamDate,

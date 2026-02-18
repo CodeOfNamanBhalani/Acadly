@@ -1,37 +1,12 @@
-import 'package:hive/hive.dart';
-
-part 'assignment_model.g.dart';
-
-@HiveType(typeId: 2)
-class AssignmentModel extends HiveObject {
-  @HiveField(0)
+class AssignmentModel {
   final String id;
-
-  @HiveField(1)
   final String title;
-
-  @HiveField(2)
   final String subject;
-
-  @HiveField(3)
   final DateTime dueDate;
-
-  @HiveField(4)
   final String priority;
-
-  @HiveField(5)
   final String status;
-
-  @HiveField(6)
-  final String userId;
-
-  @HiveField(7)
   final DateTime createdAt;
-
-  @HiveField(8)
   final String? description;
-
-  @HiveField(9)
   final int? customReminderMinutes;
 
   AssignmentModel({
@@ -41,7 +16,6 @@ class AssignmentModel extends HiveObject {
     required this.dueDate,
     required this.priority,
     required this.status,
-    required this.userId,
     required this.createdAt,
     this.description,
     this.customReminderMinutes,
@@ -57,7 +31,6 @@ class AssignmentModel extends HiveObject {
     DateTime? dueDate,
     String? priority,
     String? status,
-    String? userId,
     DateTime? createdAt,
     String? description,
     int? customReminderMinutes,
@@ -69,41 +42,40 @@ class AssignmentModel extends HiveObject {
       dueDate: dueDate ?? this.dueDate,
       priority: priority ?? this.priority,
       status: status ?? this.status,
-      userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
       description: description ?? this.description,
       customReminderMinutes: customReminderMinutes ?? this.customReminderMinutes,
     );
   }
 
-  Map<String, dynamic> toMap() {
+  // Convert to API JSON format
+  Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'title': title,
       'subject': subject,
-      'dueDate': dueDate.toIso8601String(),
-      'priority': priority,
+      'description': description ?? '',
+      'due_date': dueDate.toIso8601String(),
       'status': status,
-      'userId': userId,
-      'createdAt': createdAt.toIso8601String(),
-      'description': description,
-      'customReminderMinutes': customReminderMinutes,
+      'priority': priority,
     };
   }
 
-  factory AssignmentModel.fromMap(Map<String, dynamic> map) {
+  // Create from API JSON response
+  factory AssignmentModel.fromJson(Map<String, dynamic> json) {
     return AssignmentModel(
-      id: map['id'] as String,
-      title: map['title'] as String,
-      subject: map['subject'] as String,
-      dueDate: DateTime.parse(map['dueDate'] as String),
-      priority: map['priority'] as String,
-      status: map['status'] as String,
-      userId: map['userId'] as String,
-      createdAt: DateTime.parse(map['createdAt'] as String),
-      description: map['description'] as String?,
-      customReminderMinutes: map['customReminderMinutes'] as int?,
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '',
+      subject: json['subject'] ?? '',
+      dueDate: DateTime.tryParse(json['due_date'] ?? '') ?? DateTime.now(),
+      priority: json['priority'] ?? 'Medium',
+      status: json['status'] ?? 'Pending',
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      description: json['description'],
+      customReminderMinutes: json['custom_reminder_minutes'],
     );
   }
-}
 
+  // Legacy methods for compatibility
+  Map<String, dynamic> toMap() => toJson();
+  factory AssignmentModel.fromMap(Map<String, dynamic> map) => AssignmentModel.fromJson(map);
+}

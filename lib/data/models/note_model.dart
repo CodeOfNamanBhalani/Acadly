@@ -1,28 +1,9 @@
-import 'package:hive/hive.dart';
-
-part 'note_model.g.dart';
-
-@HiveType(typeId: 4)
-class NoteModel extends HiveObject {
-  @HiveField(0)
+class NoteModel {
   final String id;
-
-  @HiveField(1)
   final String title;
-
-  @HiveField(2)
   final String content;
-
-  @HiveField(3)
   final DateTime createdAt;
-
-  @HiveField(4)
   final DateTime updatedAt;
-
-  @HiveField(5)
-  final String userId;
-
-  @HiveField(6)
   final String? color;
 
   NoteModel({
@@ -31,7 +12,6 @@ class NoteModel extends HiveObject {
     required this.content,
     required this.createdAt,
     required this.updatedAt,
-    required this.userId,
     this.color,
   });
 
@@ -41,7 +21,6 @@ class NoteModel extends HiveObject {
     String? content,
     DateTime? createdAt,
     DateTime? updatedAt,
-    String? userId,
     String? color,
   }) {
     return NoteModel(
@@ -50,33 +29,31 @@ class NoteModel extends HiveObject {
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      userId: userId ?? this.userId,
       color: color ?? this.color,
     );
   }
 
-  Map<String, dynamic> toMap() {
+  // Convert to API JSON format
+  Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'title': title,
       'content': content,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
-      'userId': userId,
-      'color': color,
     };
   }
 
-  factory NoteModel.fromMap(Map<String, dynamic> map) {
+  // Create from API JSON response
+  factory NoteModel.fromJson(Map<String, dynamic> json) {
     return NoteModel(
-      id: map['id'] as String,
-      title: map['title'] as String,
-      content: map['content'] as String,
-      createdAt: DateTime.parse(map['createdAt'] as String),
-      updatedAt: DateTime.parse(map['updatedAt'] as String),
-      userId: map['userId'] as String,
-      color: map['color'] as String?,
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '',
+      content: json['content'] ?? '',
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] ?? json['created_at'] ?? '') ?? DateTime.now(),
+      color: json['color'],
     );
   }
-}
 
+  // Legacy methods for compatibility
+  Map<String, dynamic> toMap() => toJson();
+  factory NoteModel.fromMap(Map<String, dynamic> map) => NoteModel.fromJson(map);
+}

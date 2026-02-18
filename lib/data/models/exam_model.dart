@@ -1,34 +1,12 @@
-import 'package:hive/hive.dart';
 
-part 'exam_model.g.dart';
-
-@HiveType(typeId: 3)
-class ExamModel extends HiveObject {
-  @HiveField(0)
+class ExamModel {
   final String id;
-
-  @HiveField(1)
   final String examName;
-
-  @HiveField(2)
   final String subject;
-
-  @HiveField(3)
   final DateTime examDate;
-
-  @HiveField(4)
   final String examTime;
-
-  @HiveField(5)
   final String examLocation;
-
-  @HiveField(6)
-  final String userId;
-
-  @HiveField(7)
   final DateTime createdAt;
-
-  @HiveField(8)
   final String? notes;
 
   ExamModel({
@@ -38,7 +16,6 @@ class ExamModel extends HiveObject {
     required this.examDate,
     required this.examTime,
     required this.examLocation,
-    required this.userId,
     required this.createdAt,
     this.notes,
   });
@@ -54,7 +31,6 @@ class ExamModel extends HiveObject {
     DateTime? examDate,
     String? examTime,
     String? examLocation,
-    String? userId,
     DateTime? createdAt,
     String? notes,
   }) {
@@ -65,38 +41,47 @@ class ExamModel extends HiveObject {
       examDate: examDate ?? this.examDate,
       examTime: examTime ?? this.examTime,
       examLocation: examLocation ?? this.examLocation,
-      userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
       notes: notes ?? this.notes,
     );
   }
 
-  Map<String, dynamic> toMap() {
+  // Convert to API JSON format
+  Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'examName': examName,
       'subject': subject,
-      'examDate': examDate.toIso8601String(),
-      'examTime': examTime,
-      'examLocation': examLocation,
-      'userId': userId,
-      'createdAt': createdAt.toIso8601String(),
-      'notes': notes,
+      'exam_type': examName,
+      'exam_date': examDate.toIso8601String(),
+      'room': examLocation,
+      'notes': notes ?? '',
     };
   }
 
-  factory ExamModel.fromMap(Map<String, dynamic> map) {
+  // Create from API JSON response
+  factory ExamModel.fromJson(Map<String, dynamic> json) {
     return ExamModel(
-      id: map['id'] as String,
-      examName: map['examName'] as String,
-      subject: map['subject'] as String,
-      examDate: DateTime.parse(map['examDate'] as String),
-      examTime: map['examTime'] as String,
-      examLocation: map['examLocation'] as String,
-      userId: map['userId'] as String,
-      createdAt: DateTime.parse(map['createdAt'] as String),
-      notes: map['notes'] as String?,
+      id: json['id']?.toString() ?? '',
+      examName: json['exam_type'] ?? '',
+      subject: json['subject'] ?? '',
+      examDate: DateTime.tryParse(json['exam_date'] ?? '') ?? DateTime.now(),
+      examTime: _extractTimeFromDate(json['exam_date']),
+      examLocation: json['room'] ?? '',
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      notes: json['notes'],
     );
   }
-}
 
+  static String _extractTimeFromDate(String? dateString) {
+    if (dateString == null) return '';
+    try {
+      final dt = DateTime.parse(dateString);
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // Legacy methods for compatibility
+  Map<String, dynamic> toMap() => toJson();
+  factory ExamModel.fromMap(Map<String, dynamic> map) => ExamModel.fromJson(map);
+}

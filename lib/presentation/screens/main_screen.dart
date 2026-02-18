@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
 
-import '../controllers/auth_provider.dart';
 import '../controllers/timetable_provider.dart';
 import '../controllers/assignment_provider.dart';
 import '../controllers/exam_provider.dart';
@@ -43,21 +42,21 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    // Use addPostFrameCallback to avoid calling notifyListeners during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
   }
 
   // ----------------------------
   // LOAD USER DATA
   // ----------------------------
   void _loadData() {
-    final userId = context.read<AuthProvider>().currentUser?.id;
-
-    if (userId != null) {
-      context.read<TimetableProvider>().loadTimetable(userId);
-      context.read<AssignmentProvider>().loadAssignments(userId);
-      context.read<ExamProvider>().loadExams(userId);
-      context.read<NoteProvider>().loadNotes(userId);
-    }
+    // Load all data from API (user context is handled via auth token)
+    context.read<TimetableProvider>().loadTimetable();
+    context.read<AssignmentProvider>().loadAssignments();
+    context.read<ExamProvider>().loadExams();
+    context.read<NoteProvider>().loadNotes();
 
     // Notices load for everyone
     context.read<NoticeProvider>().loadNotices();

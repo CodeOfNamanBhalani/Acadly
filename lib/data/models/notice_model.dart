@@ -1,25 +1,9 @@
-import 'package:hive/hive.dart';
-
-part 'notice_model.g.dart';
-
-@HiveType(typeId: 5)
-class NoticeModel extends HiveObject {
-  @HiveField(0)
+class NoticeModel {
   final String id;
-
-  @HiveField(1)
   final String title;
-
-  @HiveField(2)
   final String description;
-
-  @HiveField(3)
   final DateTime datePosted;
-
-  @HiveField(4)
   final String postedBy;
-
-  @HiveField(5)
   final bool isImportant;
 
   NoticeModel({
@@ -49,26 +33,27 @@ class NoticeModel extends HiveObject {
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'title': title,
       'description': description,
-      'datePosted': datePosted.toIso8601String(),
-      'postedBy': postedBy,
-      'isImportant': isImportant,
+      'posted_by': postedBy,
+      'is_important': isImportant,
     };
   }
 
-  factory NoticeModel.fromMap(Map<String, dynamic> map) {
+  factory NoticeModel.fromJson(Map<String, dynamic> json) {
     return NoticeModel(
-      id: map['id'] as String,
-      title: map['title'] as String,
-      description: map['description'] as String,
-      datePosted: DateTime.parse(map['datePosted'] as String),
-      postedBy: map['postedBy'] as String,
-      isImportant: map['isImportant'] as bool? ?? false,
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      datePosted: DateTime.tryParse(json['date_posted'] ?? json['created_at'] ?? '') ?? DateTime.now(),
+      postedBy: json['posted_by'] ?? '',
+      isImportant: json['is_important'] ?? false,
     );
   }
-}
 
+  // Legacy methods for compatibility
+  Map<String, dynamic> toMap() => toJson();
+  factory NoticeModel.fromMap(Map<String, dynamic> map) => NoticeModel.fromJson(map);
+}

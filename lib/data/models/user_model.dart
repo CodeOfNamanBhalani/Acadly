@@ -1,48 +1,22 @@
-import 'package:hive/hive.dart';
-
-part 'user_model.g.dart';
-
-@HiveType(typeId: 0)
-class UserModel extends HiveObject {
-  // Unique User ID
-  @HiveField(0)
+class UserModel {
   final String id;
-
-  // Full Name
-  @HiveField(1)
   final String name;
-
-  // Email Address
-  @HiveField(2)
   final String email;
-
-  // Password (for local auth demo)
-  @HiveField(3)
-  final String password;
-
-  // Admin Role
-  @HiveField(4)
   final bool isAdmin;
-
-  // Account Created Date
-  @HiveField(5)
   final DateTime createdAt;
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
-    required this.password,
     this.isAdmin = false,
     required this.createdAt,
   });
 
-  // CopyWith Method
   UserModel copyWith({
     String? id,
     String? name,
     String? email,
-    String? password,
     bool? isAdmin,
     DateTime? createdAt,
   }) {
@@ -50,33 +24,31 @@ class UserModel extends HiveObject {
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
-      password: password ?? this.password,
       isAdmin: isAdmin ?? this.isAdmin,
       createdAt: createdAt ?? this.createdAt,
     );
   }
 
-  // Convert Object → Map
-  Map<String, dynamic> toMap() {
+  // Convert to API JSON format
+  Map<String, dynamic> toJson() {
     return {
-      "id": id,
-      "name": name,
-      "email": email,
-      "password": password,
-      "isAdmin": isAdmin,
-      "createdAt": createdAt.toIso8601String(),
+      'username': name,
+      'email': email,
     };
   }
 
-  // Convert Map → Object
-  factory UserModel.fromMap(Map<String, dynamic> map) {
+  // Create from API JSON response
+  factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: map["id"],
-      name: map["name"],
-      email: map["email"],
-      password: map["password"],
-      isAdmin: map["isAdmin"] ?? false,
-      createdAt: DateTime.parse(map["createdAt"]),
+      id: json['id']?.toString() ?? '',
+      name: json['username'] ?? json['name'] ?? '',
+      email: json['email'] ?? '',
+      isAdmin: json['is_admin'] ?? false,
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
     );
   }
+
+  // Legacy methods for compatibility
+  Map<String, dynamic> toMap() => toJson();
+  factory UserModel.fromMap(Map<String, dynamic> map) => UserModel.fromJson(map);
 }

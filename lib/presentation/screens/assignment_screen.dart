@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/constants/app_constants.dart';
-import '../controllers/auth_provider.dart';
 import '../controllers/assignment_provider.dart';
 import '../../data/models/assignment_model.dart';
 
@@ -344,7 +343,6 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
                         }
 
                         // Gather all data synchronously
-                        final userId = context.read<AuthProvider>().currentUser!.id;
                         final provider = context.read<AssignmentProvider>();
                         final title = titleController.text;
                         final subject = subjectController.text;
@@ -375,7 +373,6 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
                           );
                         } else {
                           provider.addAssignment(
-                            userId: userId,
                             title: title,
                             subject: subject,
                             dueDate: fullDueDate,

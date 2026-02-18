@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/date_utils.dart';
-import '../controllers/auth_provider.dart';
 import '../controllers/note_provider.dart';
 import '../../data/models/note_model.dart';
 
@@ -27,7 +26,6 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     final noteProvider = context.watch<NoteProvider>();
     final notes = noteProvider.notes;
-    final userId = context.read<AuthProvider>().currentUser?.id ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +43,7 @@ class _NotesScreenState extends State<NotesScreen> {
             child: TextField(
               controller: _searchController,
               onChanged: (value) {
-                noteProvider.searchNotes(userId, value);
+                noteProvider.searchNotes(value);
               },
               decoration: InputDecoration(
                 hintText: 'Search notes...',
@@ -181,7 +179,6 @@ class _NotesScreenState extends State<NotesScreen> {
                           return;
                         }
 
-                        final userId = context.read<AuthProvider>().currentUser!.id;
                         final provider = context.read<NoteProvider>();
 
                         if (isEditing) {
@@ -193,7 +190,6 @@ class _NotesScreenState extends State<NotesScreen> {
                           );
                         } else {
                           await provider.addNote(
-                            userId: userId,
                             title: titleController.text,
                             content: contentController.text,
                           );

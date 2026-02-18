@@ -1,32 +1,13 @@
-import 'package:hive/hive.dart';
-
-part 'timetable_model.g.dart';
-
-@HiveType(typeId: 1)
-class TimetableModel extends HiveObject {
-  @HiveField(0)
+class TimetableModel {
   final String id;
-
-  @HiveField(1)
   final String subjectName;
-
-  @HiveField(2)
   final String facultyName;
-
-  @HiveField(3)
   final int dayOfWeek; // 0 = Monday, 6 = Sunday
-
-  @HiveField(4)
   final String startTime; // Format: "HH:mm"
-
-  @HiveField(5)
   final String endTime; // Format: "HH:mm"
-
-  @HiveField(6)
   final String roomNumber;
 
-  @HiveField(7)
-  final String userId;
+  static const List<String> dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   TimetableModel({
     required this.id,
@@ -36,7 +17,6 @@ class TimetableModel extends HiveObject {
     required this.startTime,
     required this.endTime,
     required this.roomNumber,
-    required this.userId,
   });
 
   TimetableModel copyWith({
@@ -47,7 +27,6 @@ class TimetableModel extends HiveObject {
     String? startTime,
     String? endTime,
     String? roomNumber,
-    String? userId,
   }) {
     return TimetableModel(
       id: id ?? this.id,
@@ -57,39 +36,48 @@ class TimetableModel extends HiveObject {
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       roomNumber: roomNumber ?? this.roomNumber,
-      userId: userId ?? this.userId,
     );
   }
 
-  String get dayName {
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return days[dayOfWeek];
-  }
+  String get dayName => dayNames[dayOfWeek];
 
-  Map<String, dynamic> toMap() {
+  // Convert to API JSON format - API expects day as string like "Monday"
+  Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'subjectName': subjectName,
-      'facultyName': facultyName,
-      'dayOfWeek': dayOfWeek,
-      'startTime': startTime,
-      'endTime': endTime,
-      'roomNumber': roomNumber,
-      'userId': userId,
+      'subject': subjectName,
+      'day': dayName, // Send as string "Monday", "Tuesday", etc.
+      'start_time': startTime,
+      'end_time': endTime,
+      'room': roomNumber,
+      'teacher': facultyName,
     };
   }
 
-  factory TimetableModel.fromMap(Map<String, dynamic> map) {
+  // Create from API JSON response
+  factory TimetableModel.fromJson(Map<String, dynamic> json) {
+    // Parse day - API returns string like "Monday"
+    int dayIndex = 0;
+    final dayValue = json['day'];
+    if (dayValue is int) {
+      dayIndex = dayValue;
+    } else if (dayValue is String) {
+      dayIndex = dayNames.indexWhere((d) => d.toLowerCase() == dayValue.toLowerCase());
+      if (dayIndex == -1) dayIndex = 0;
+    }
+
     return TimetableModel(
-      id: map['id'] as String,
-      subjectName: map['subjectName'] as String,
-      facultyName: map['facultyName'] as String,
-      dayOfWeek: map['dayOfWeek'] as int,
-      startTime: map['startTime'] as String,
-      endTime: map['endTime'] as String,
-      roomNumber: map['roomNumber'] as String,
-      userId: map['userId'] as String,
+      id: json['id']?.toString() ?? '',
+      subjectName: json['subject'] ?? '',
+      facultyName: json['teacher'] ?? '',
+      dayOfWeek: dayIndex,
+      startTime: json['start_time'] ?? '',
+      endTime: json['end_time'] ?? '',
+      roomNumber: json['room'] ?? '',
     );
   }
+
+  // Legacy methods for compatibility
+  Map<String, dynamic> toMap() => toJson();
+  factory TimetableModel.fromMap(Map<String, dynamic> map) => TimetableModel.fromJson(map);
 }
 

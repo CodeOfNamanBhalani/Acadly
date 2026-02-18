@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/constants/app_constants.dart';
-import '../controllers/auth_provider.dart';
 import '../controllers/timetable_provider.dart';
 import '../../data/models/timetable_model.dart';
 
@@ -318,7 +317,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
                           return;
                         }
 
-                        final userId = context.read<AuthProvider>().currentUser!.id;
                         final provider = context.read<TimetableProvider>();
 
                         final startTimeStr =
@@ -339,7 +337,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
                           );
                         } else {
                           await provider.addTimetableEntry(
-                            userId: userId,
                             subjectName: subjectController.text,
                             facultyName: facultyController.text,
                             dayOfWeek: selectedDay,

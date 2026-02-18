@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import '../../data/database/database_service.dart';
 import '../../data/models/notice_model.dart';
 
+// NoticeProvider - Keeping notices local as they may not be in the API
+// If the API supports notices, this can be updated similar to other providers
 class NoticeProvider extends ChangeNotifier {
-  final DatabaseService _db = DatabaseService();
   final Uuid _uuid = const Uuid();
 
   List<NoticeModel> _notices = [];
@@ -20,7 +20,8 @@ class NoticeProvider extends ChangeNotifier {
       _notices.take(5).toList();
 
   void loadNotices() {
-    _notices = _db.getAllNotices();
+    // Notices are kept in memory for now
+    // Can be connected to API if endpoint exists
     notifyListeners();
   }
 
@@ -42,7 +43,6 @@ class NoticeProvider extends ChangeNotifier {
       isImportant: isImportant,
     );
 
-    await _db.addNotice(notice);
     _notices.insert(0, notice);
 
     _isLoading = false;
@@ -50,7 +50,6 @@ class NoticeProvider extends ChangeNotifier {
   }
 
   Future<void> updateNotice(NoticeModel notice) async {
-    await _db.updateNotice(notice);
     final index = _notices.indexWhere((n) => n.id == notice.id);
     if (index != -1) {
       _notices[index] = notice;
@@ -59,9 +58,7 @@ class NoticeProvider extends ChangeNotifier {
   }
 
   Future<void> deleteNotice(String id) async {
-    await _db.deleteNotice(id);
     _notices.removeWhere((n) => n.id == id);
     notifyListeners();
   }
 }
-
